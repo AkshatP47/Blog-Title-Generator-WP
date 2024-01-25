@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Title Generator</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <style>
+        /* Basic styles for the text generation tool */
+        #blog-title-generator {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            font-family: 'Montserrat', sans-serif; /* Changed font to Montserrat */
+            text-align: center;
+        }
+
+        #topic {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #generate-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #ffc900;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #generate-button:hover {
+            background-color: #ffd800;
+        }
+
+        .result-title {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .copy-icon {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+        }
+
+        #copy-all-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            background-color: #ffc900;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #copy-all-button:hover {
+            background-color: #ffd800;
+        }
+
+        /* CSS for the loader */
+        .loader {
+            display: block;
+            margin: 50px auto;
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="blog-title-generator">
+    <input type="text" id="topic" placeholder="Describe Your Blog Post in few words...">
+    <button id="generate-button">Generate Titles!</button>
+    <div id="result-container" style="display: none;">
+        <div class="result-wrapper" id="result-wrapper"></div>
+        <button id="copy-all-button">Copy All</button>
+    </div>
+    <div id="loading" class="loader" style="display: none;"></div>
+</div>
+
+<script>
+    document.getElementById("generate-button").addEventListener("click", function(e){
+        e.preventDefault();
+        
+        var generateButton = document.getElementById("generate-button");
+        
+        if (generateButton.disabled) {
+            return; // Prevent multiple clicks while content is being generated
+        }
+        
+        generateButton.disabled = true;
+        
+        var topic = document.getElementById('topic').value;
+        var blogTitleGeneratorPrompt = "As a skilled blogger, your task is to generate 10 blog post titles based on the topic: " + topic + ". Craft titles that are attention-grabbing, accurately represent the content, and optimize for SEO. Be creative and make sure the titles resonate with your target audience.";
+        var loading = document.getElementById('loading');
+        var result = document.getElementById('result-wrapper'); // Changed to result-wrapper
+        var resultC = document.getElementById('result-container');
+
+        loading.style.display = 'block';
+        result.style.display = 'none'; // hide result wrapper
+        resultC.style.display = 'none';
+
+        var formData = new FormData();
+        formData.append('action', 'openai_generate_text');
+        formData.append('prompt', blogTitleGeneratorPrompt);
+
+        fetch('/wp-admin/admin-ajax.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            loading.style.display = 'none';
+            if(data.success) {
+                result.innerText = data.data.choices[0].message.content;
+                result.style.display = 'block'; // show result wrapper
+                resultC.style.display = 'block';
+                generateButton.disabled = false;
+            } else {
+                result.innerText = 'An error occurred: ' + data.data;
+                result.style.display = 'block'; // show result wrapper
+                resultC.style.display = 'block';
+                generateButton.disabled = false;
+            }
+        })
+        .catch(error => {
+            loading.style.display = 'none';
+            result.innerText = 'An error occurred: ' + error.message;
+            result.style.display = 'block'; // show result wrapper
+            resultC.style.display = 'block';
+            generateButton.disabled = false;
+        });
+    });
+    
+    var copyAllButton = document.getElementById('copy-all-button');
+    copyAllButton.addEventListener('click', function () {
+        var result = document.getElementById('result-wrapper');
+        var tempTextArea = document.createElement('textarea');
+        tempTextArea.value = result.innerText;
+        document.body.appendChild(tempTextArea);
+        tempTextArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextArea);
+        alert('Copied to clipboard!');
+    });
+</script>
+
+</body>
+</html>
