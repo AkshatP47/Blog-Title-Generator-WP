@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Title Generator</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="blog-title-generator">
+    <input type="text" id="topic" placeholder="Describe Your Blog Post in few words...">
+    <button id="generate-button">Generate Titles!</button>
+    <div id="result-container" style="display: none;">
+        <div class="result-wrapper" id="result-wrapper"></div>
+        <button id="copy-all-button">Copy All</button>
+    </div>
+    <div id="loading" class="loader" style="display: none;"></div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
